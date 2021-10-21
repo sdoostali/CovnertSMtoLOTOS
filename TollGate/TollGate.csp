@@ -1,0 +1,381 @@
+{-*******************************************************
+
+          this tool is  Generated via Mohammad Javani 
+      in Department of Computer & Electrical Engineering
+                 University of Kashan
+                 Kashan, Esfahan, Iran 
+
+*********************************************************-}
+
+channel initial5,initial4,Verified,create2,t1,t2,Create1,initialB,sendReq,Create,allowEnter,runAway,Exitc,getAck,carExit,carRunaway,carEnter,getReq,turnGreen,Picture,turnRed,turnOff,enter,I0toTollGate,NewCar,I1toCar,I3toServer,I4toLight,I5toCamera
+channel t0,t: Bool
+
+TollGate1 = 
+( I0(True)
+[| {I0toTollGate} |]
+( I1(True)
+[| {I1toCar} |]
+( I3(True)
+[| {I3toServer} |]
+( I4(True)
+[| {I4toLight} |]
+( I5(True)
+[| {I5toCamera} |]
+( Car
+[| {Exitc,runAway,enter,carEnter,carExit,carRunaway} |]
+( Server
+[| {getReq,getAck} |]
+( Light
+[| {turnRed,turnGreen} |]
+( Camera
+[| {turnOff,Picture} |]
+( TollGate
+ ) ) ) ) ) ) ) ) ) )
+
+
+ I0(CRT) = 
+if CRT==true then I0toTollGate -> 
+I0 (False)
+ else SKIP
+
+
+ I1(CRT) = 
+if CRT==true then I1toCar -> 
+I1 (False)
+ else SKIP
+
+
+ I3(CRT) = 
+if CRT==true then I3toServer -> 
+I3 (False)
+ else SKIP
+
+
+ I4(CRT) = 
+if CRT==true then I4toLight -> 
+I4 (False)
+ else SKIP
+
+
+ I5(CRT) = 
+if CRT==true then I5toCamera -> 
+I5 (False)
+ else SKIP
+
+
+ TollGate = ( Initial1
+[| {Create} |]
+( IdleT
+[| {carRunaway,allowEnter,carExit} |]
+( BusyT
+ ) ) )
+
+
+ IdleT = 
+Create -> 
+(
+	allowEnter -> 
+		IdleT 
+)
+ [] 
+carExit -> turnRed -> 
+(
+	allowEnter -> 
+		IdleT 
+)
+ [] 
+carRunaway -> turnOff -> 
+(
+	allowEnter -> 
+		IdleT 
+)
+
+
+ BusyT = ( InitialB
+[| {initialB} |]
+( Forwarding
+[| {carEnter} |]
+( Scan
+[| {sendReq} |]
+( WaitAcq
+[| {getAck} |]
+( Choice1(True)
+[| {t.true,t0.true,t.false,t0.false} |]
+( PictureT
+ ||| 
+( Signal
+ ) ) ) ) ) ) )
+
+
+ Forwarding = 
+initialB -> 
+(
+	carEnter -> 
+		Forwarding 
+)
+
+
+ Scan = 
+carEnter -> 
+(
+	sendReq -> 
+		Scan 
+)
+
+
+ WaitAcq = 
+sendReq -> getReq -> 
+(
+	getAck -> 
+		WaitAcq 
+)
+
+
+ PictureT = 
+t0 ?Reg  -> 
+
+(
+	carRunaway -> 
+		PictureT 
+)
+
+
+ Signal = 
+t ?Reg  -> 
+
+(
+	carExit -> 
+		Signal 
+)
+
+
+ InitialB = 
+allowEnter -> enter -> 
+(
+	initialB -> 
+		InitialB 
+
+)
+
+
+ Choice1(Reg) = 
+getAck -> 
+(
+	t !true -> 
+		Choice1 (Reg)
+
+ [] 
+	t0 !false -> 
+		Choice1 (Reg)
+
+)
+
+
+
+ Initial1 = 
+I0toTollGate -> 
+(
+	Create -> 
+		Initial1 
+
+)
+
+
+
+ Car = ( Initial2
+[| {Create1} |]
+( ExitCar
+[| {Exitc,t1} |]
+( RunAway
+[| {runAway,t2} |]
+( Enter
+[| {enter} |]
+( Wait
+ ||| 
+( Final
+ ) ) ) ) ) )
+
+
+ ExitCar = 
+Exitc -> carExit -> 
+(
+	t1 -> 
+		ExitCar 
+)
+
+
+ RunAway = 
+runAway -> carRunaway -> 
+(
+	t2 -> 
+		RunAway 
+)
+
+
+ Enter = 
+enter -> carEnter -> 
+(
+	Exitc -> 
+		Enter 
+ [] 
+	runAway -> 
+		Enter 
+)
+
+
+ Wait = 
+Create1 -> 
+(
+	enter -> 
+		Wait 
+)
+
+
+ Final = 
+t1 -> 
+(
+		Final 
+
+)
+ [] 
+t2 -> 
+(
+		Final 
+
+)
+
+
+ Initial2 = 
+I1toCar -> 
+(
+	Create1 -> 
+		Initial2 
+
+)
+
+
+
+ Server = ( Initial3
+[| {create2} |]
+( BusyS
+[| {getReq,Verified} |]
+( IdleS
+ ) ) )
+
+
+ BusyS = 
+getReq -> 
+(
+	Verified -> 
+		BusyS 
+)
+
+
+ IdleS = 
+create2 -> 
+(
+	getReq -> 
+		IdleS 
+)
+ [] 
+Verified -> getAck -> 
+(
+	getReq -> 
+		IdleS 
+)
+
+
+ Initial3 = 
+I3toServer -> 
+(
+	create2 -> 
+		Initial3 
+
+)
+
+
+
+ Light = ( Initial4
+[| {initial4} |]
+( Green
+[| {turnGreen,turnRed} |]
+( Red
+ ) ) )
+
+
+ Green = 
+turnGreen -> Exitc -> 
+(
+	turnRed -> 
+		Green 
+)
+
+
+ Red = 
+initial4 -> 
+(
+	turnGreen -> 
+		Red 
+)
+ [] 
+turnRed -> 
+(
+	turnGreen -> 
+		Red 
+)
+
+
+ Initial4 = 
+I4toLight -> 
+(
+	initial4 -> 
+		Initial4 
+
+)
+
+
+
+ Camera = ( Initial5
+[| {initial5} |]
+( PictureC
+[| {Picture,turnOff} |]
+( IdleC
+ ) ) )
+
+
+ PictureC = 
+Picture -> runAway -> 
+(
+	turnOff -> 
+		PictureC 
+)
+
+
+ IdleC = 
+initial5 -> 
+(
+	Picture -> 
+		IdleC 
+)
+ [] 
+turnOff -> 
+(
+	Picture -> 
+		IdleC 
+)
+
+
+ Initial5 = 
+I5toCamera -> 
+(
+	initial5 -> 
+		Initial5 
+
+)
+
+
+
+
+
+ assert TollGate1:[ divergence free ] 
+

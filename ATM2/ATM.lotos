@@ -1,0 +1,145 @@
+(********************************************************
+
+          this tool is  Generated via Mohammad Javani 
+      in Department of Computer & Electrical Engineering
+                 University of Kashan
+                 Kashan, Esfahan, Iran 
+
+**********************************************************)
+
+
+specification ATM [start,IdletoMaintenace,MaintenacetoIdle,Init0toTestingDevices, TestingDevicestoSelfDiagnosis, SelfDiagnosistoFinal0, Init1toWaiting, keyPress, CommandtoWaiting, CommandtoFinal1] : exit
+
+library	
+	Natural,Boolean
+endlib
+
+behavior
+
+Initial [start] (True)
+|[start]|
+Idle [start,IdletoMaintenace,MaintenacetoIdle] 
+|[IdletoMaintenace,MaintenacetoIdle]|
+Maintenace [IdletoMaintenace,MaintenacetoIdle,Init0toTestingDevices,TestingDevicestoSelfDiagnosis,SelfDiagnosistoFinal0,Init1toWaiting,keyPress,CommandtoWaiting,CommandtoFinal1] 
+
+where
+
+process Initial [start] (CRT:bool) : exit :=
+[CRT]->start;
+Initial [start] (False)
+endproc
+
+process Idle [start,IdletoMaintenace,MaintenacetoIdle]  : exit :=
+start;
+(
+	IdletoMaintenace;
+		Idle [start,IdletoMaintenace,MaintenacetoIdle] 
+)
+[]
+MaintenacetoIdle;
+(
+	IdletoMaintenace;
+		Idle [start,IdletoMaintenace,MaintenacetoIdle] 
+)
+endproc
+
+process Maintenace [IdletoMaintenace,MaintenacetoIdle, Init0toTestingDevices, TestingDevicestoSelfDiagnosis, SelfDiagnosistoFinal0, Init1toWaiting, keyPress, CommandtoWaiting, CommandtoFinal1]  : exit :=
+(
+Init0 [Init0toTestingDevices,IdletoMaintenace] 
+|[Init0toTestingDevices]|
+TestingDevices [Init0toTestingDevices,TestingDevicestoSelfDiagnosis] 
+|[TestingDevicestoSelfDiagnosis]|
+SelfDiagnosis [TestingDevicestoSelfDiagnosis,SelfDiagnosistoFinal0] 
+|[SelfDiagnosistoFinal0]|
+Final0 [SelfDiagnosistoFinal0,MaintenacetoIdle] 
+)
+|[IdletoMaintenace,MaintenacetoIdle]|
+(
+Init1 [Init1toWaiting,IdletoMaintenace] 
+|[Init1toWaiting]|
+Waiting [Init1toWaiting,keyPress,CommandtoWaiting] 
+|[keyPress,CommandtoWaiting]|
+Command [keyPress,CommandtoWaiting,CommandtoFinal1] (true)
+|[CommandtoFinal1]|
+Final1 [CommandtoFinal1,MaintenacetoIdle] 
+)
+
+where
+
+process Init0 [Init0toTestingDevices,IdletoMaintenace]  : exit :=
+IdletoMaintenace;
+(
+	Init0toTestingDevices;
+		Init0 [Init0toTestingDevices,IdletoMaintenace] 
+
+)
+endproc
+
+process TestingDevices [Init0toTestingDevices,TestingDevicestoSelfDiagnosis]  : exit :=
+Init0toTestingDevices;
+(
+	TestingDevicestoSelfDiagnosis;
+		TestingDevices [Init0toTestingDevices,TestingDevicestoSelfDiagnosis] 
+)
+endproc
+
+process SelfDiagnosis [TestingDevicestoSelfDiagnosis,SelfDiagnosistoFinal0]  : exit :=
+TestingDevicestoSelfDiagnosis;
+(
+	SelfDiagnosistoFinal0;
+		SelfDiagnosis [TestingDevicestoSelfDiagnosis,SelfDiagnosistoFinal0] 
+)
+endproc
+
+process Final0 [SelfDiagnosistoFinal0,MaintenacetoIdle]  : exit :=
+SelfDiagnosistoFinal0;
+(
+	MaintenacetoIdle;
+		Final0 [SelfDiagnosistoFinal0,MaintenacetoIdle] 
+)
+endproc
+
+process Init1 [Init1toWaiting,IdletoMaintenace]  : exit :=
+IdletoMaintenace;
+(
+	Init1toWaiting;
+		Init1 [Init1toWaiting,IdletoMaintenace] 
+)
+endproc
+
+process Waiting [Init1toWaiting,keyPress,CommandtoWaiting]  : exit :=
+Init1toWaiting;
+(
+	keyPress;
+		Waiting [Init1toWaiting,keyPress,CommandtoWaiting] 
+)
+[]
+CommandtoWaiting ?continue:bool [continue eq true];
+(
+	keyPress;
+		Waiting [Init1toWaiting,keyPress,CommandtoWaiting] 
+)
+endproc
+
+process Command [keyPress,CommandtoWaiting,CommandtoFinal1](continue:bool)  : exit :=
+keyPress;
+(
+	CommandtoWaiting !true;
+		Command [keyPress,CommandtoWaiting,CommandtoFinal1](continue) 
+[]
+	CommandtoFinal1 !false;
+		Command [keyPress,CommandtoWaiting,CommandtoFinal1](continue)
+)
+endproc
+
+process Final1 [CommandtoFinal1,MaintenacetoIdle]  : exit :=
+CommandtoFinal1 ?continue:bool [continue eq false];
+(
+	MaintenacetoIdle;
+		Final1 [CommandtoFinal1,MaintenacetoIdle] 
+)
+endproc
+
+endproc
+
+endspec

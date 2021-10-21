@@ -1,0 +1,390 @@
+(********************************************************
+
+          this tool is  Generated via Mohammad Javani 
+      in Department of Computer & Electrical Engineering
+                 University of Kashan
+                 Kashan, Esfahan, Iran 
+
+**********************************************************)
+
+
+specification TollGate1 [Initial5,Initial4,Verified,create2,t1,t2,Create1,InitialB,sendReq,t0,t,Create,allowEnter,runAway,Exitc,getAck,carExit,carRunaway,carEnter,getReq,turnGreen,Picture,turnRed,turnOff,Enter,I0toTollGate,NewCar,I1toCar,I3toServer,I4toLight,I5toCamera] : exit
+
+library	
+	Natural,Boolean
+endlib
+
+behavior
+
+I0 [I0toTollGate] (True)
+|[I0toTollGate]|
+I1 [I1toCar] (True)
+|[I1toCar]|
+I3 [I3toServer] (True)
+|[I3toServer]|
+I4 [I4toLight] (True)
+|[I4toLight]|
+I5 [I5toCamera] (True)
+|[I5toCamera]|
+Car [carEnter,Exitc,t1,t2,Create1,Enter,carExit,carRunaway,runAway,I1toCar] 
+|[Exitc,runAway,Enter,carEnter,carExit,carRunaway]|
+Server [Verified,create2,getReq,getAck,I3toServer] 
+|[getReq,getAck]|
+Light [Initial4,Exitc,turnGreen,turnRed,I4toLight] 
+|[turnRed,turnGreen]|
+Camera [Initial5,runAway,Picture,turnOff,I5toCamera] 
+|[turnOff,Picture]|
+TollGate [InitialB,sendReq,t0,t,getReq,getAck,turnGreen,Picture,Create,allowEnter,carEnter,carExit,turnRed,carRunaway,turnOff,Enter,I0toTollGate] 
+
+where
+
+process I0 [I0toTollGate] (CRT:bool) : exit :=
+[CRT]->I0toTollGate;
+I0 [I0toTollGate] (False)
+endproc
+
+process I1 [I1toCar] (CRT:bool) : exit :=
+[CRT]->I1toCar;
+I1 [I1toCar] (False)
+endproc
+
+process I3 [I3toServer] (CRT:bool) : exit :=
+[CRT]->I3toServer;
+I3 [I3toServer] (False)
+endproc
+
+process I4 [I4toLight] (CRT:bool) : exit :=
+[CRT]->I4toLight;
+I4 [I4toLight] (False)
+endproc
+
+process I5 [I5toCamera] (CRT:bool) : exit :=
+[CRT]->I5toCamera;
+I5 [I5toCamera] (False)
+endproc
+
+process TollGate [InitialB,sendReq,t0,t,getReq,getAck,turnGreen,Picture,Create,allowEnter,carEnter,carExit,turnRed,carRunaway,turnOff,Enter,I0toTollGate]  : exit :=
+(
+Initial1 [Create,I0toTollGate] 
+|[Create]|
+IdleT [Create,carExit,turnRed,carRunaway,turnOff,allowEnter] 
+|[carRunaway,allowEnter,carExit]|
+BusyT [InitialB,sendReq,t0,t,carEnter,getReq,getAck,turnGreen,Picture,carExit,carRunaway,allowEnter,Enter] 
+)
+
+where
+
+process IdleT [Create,carExit,turnRed,carRunaway,turnOff,allowEnter]  : exit :=
+Create;
+(
+	allowEnter;
+		IdleT [Create,carExit,turnRed,carRunaway,turnOff,allowEnter] 
+)
+[]
+carExit;turnRed;
+(
+	allowEnter;
+		IdleT [Create,carExit,turnRed,carRunaway,turnOff,allowEnter] 
+)
+[]
+carRunaway;turnOff;
+(
+	allowEnter;
+		IdleT [Create,carExit,turnRed,carRunaway,turnOff,allowEnter] 
+)
+endproc
+
+process BusyT [InitialB,sendReq,t0,t,carEnter,getReq,getAck,turnGreen,Picture,carExit,carRunaway,allowEnter,Enter]  : exit :=
+(
+InitialB [Enter,InitialB,allowEnter] 
+|[InitialB]|
+Forwarding [InitialB,carEnter]
+|[carEnter]|
+Scan [carEnter,sendReq] 
+|[sendReq]|
+WaitAcq [sendReq,getReq,getAck] 
+|[getAck]|
+Choice1 [getAck,t,t0] (True)
+|[t,t0]|
+PictureT [t0,Picture,carRunaway] 
+|||
+Signal [t,turnGreen,carExit] 
+)
+
+where
+
+process Forwarding [InitialB,carEnter]  : exit :=
+InitialB;
+(
+	carEnter;
+		Forwarding [InitialB,carEnter] 
+)
+endproc
+
+process Scan [carEnter,sendReq]  : exit :=
+carEnter;
+(
+	sendReq;
+		Scan [carEnter,sendReq] 
+)
+endproc
+
+process WaitAcq [sendReq,getReq,getAck]  : exit :=
+sendReq;getReq;
+(
+	getAck;
+		WaitAcq [sendReq,getReq,getAck] 
+)
+endproc
+
+process PictureT [t0,Picture,carRunaway]  : exit :=
+t0 ?Reg:bool [Reg eq false];Picture;
+(
+	carRunaway;
+		PictureT [t0,Picture,carRunaway] 
+)
+endproc
+
+process Signal [t,turnGreen,carExit]  : exit :=
+t ?Reg:bool [Reg eq true];turnGreen;
+(
+	carExit;
+		Signal [t,turnGreen,carExit] 
+)
+endproc
+
+process InitialB [Enter,InitialB,allowEnter]  : exit :=
+allowEnter;Enter;
+(
+	InitialB;
+		InitialB [Enter,InitialB,allowEnter] 
+)
+endproc
+
+process Choice1 [getAck,t,t0] (Reg:bool) : exit :=
+getAck;
+(
+	t !true;
+		Choice1 [getAck,t,t0] (Not (Reg))
+[]
+	t0 !false;
+		Choice1 [getAck,t,t0] (Not (Reg))
+)
+endproc
+
+endproc
+
+process Initial1 [Create,I0toTollGate]  : exit :=
+I0toTollGate;
+(
+	Create;
+		Initial1 [Create,I0toTollGate] 
+)
+endproc
+
+endproc
+
+process Car [carEnter,Exitc,t1,t2,Create1,Enter,carExit,carRunaway,runAway,I1toCar]  : exit :=
+(
+Initial2 [Create1,I1toCar] 
+|[Create1]|
+ExitCar [Exitc,carExit,t1] 
+|[Exitc,t1]|
+RunAway [runAway,carRunaway,t2] 
+|[runAway,t2]|
+Enter [carEnter,Enter,Exitc,runAway] 
+|[Enter]|
+Wait [Create1,Enter] 
+|||
+Final [t1,t2] 
+)
+
+where
+
+process ExitCar [Exitc,carExit,t1]  : exit :=
+Exitc;carExit;
+(
+	t1;
+		ExitCar [Exitc,carExit,t1] 
+)
+endproc
+
+process RunAway [runAway,carRunaway,t2]  : exit :=
+runAway;carRunaway;
+(
+	t2;
+		RunAway [runAway,carRunaway,t2] 
+)
+endproc
+
+process Enter [carEnter,Enter,Exitc,runAway]  : exit :=
+Enter;carEnter;
+(
+	Exitc;
+		Enter [carEnter,Enter,Exitc,runAway] 
+[]
+	runAway;
+		Enter [carEnter,Enter,Exitc,runAway] 
+)
+endproc
+
+process Wait [Create1,Enter]  : exit :=
+Create1;
+(
+	Enter;
+		Wait [Create1,Enter] 
+)
+endproc
+
+process Final [t1,t2]  : exit :=
+t1;
+(
+		Final [t1,t2] 
+)
+[]
+t2;
+(
+		Final [t1,t2] 
+)
+endproc
+
+process Initial2 [Create1,I1toCar]  : exit :=
+I1toCar;
+(
+	Create1;
+		Initial2 [Create1,I1toCar] 
+)
+endproc
+
+endproc
+
+process Server [Verified,create2,getReq,getAck,I3toServer]  : exit :=
+(
+Initial3 [create2,I3toServer] 
+|[create2]|
+BusyS [getReq,Verified] 
+|[getReq,Verified]|
+IdleS [create2,getReq,Verified,getAck] 
+)
+
+where
+
+process BusyS [getReq,Verified]  : exit :=
+getReq;
+(
+	Verified;
+		BusyS [getReq,Verified] 
+)
+endproc
+
+process IdleS [create2,getReq,Verified,getAck]  : exit :=
+create2;
+(
+	getReq;
+		IdleS [create2,getReq,Verified,getAck] 
+)
+[]
+Verified;getAck;
+(
+	getReq;
+		IdleS [create2,getReq,Verified,getAck] 
+)
+endproc
+
+process Initial3 [create2,I3toServer]  : exit :=
+I3toServer;
+(
+	create2;
+		Initial3 [create2,I3toServer] 
+)
+endproc
+
+endproc
+
+process Light [Initial4,Exitc,turnGreen,turnRed,I4toLight]  : exit :=
+(
+Initial4 [Initial4,I4toLight] 
+|[Initial4]|
+Green [turnGreen,Exitc,turnRed] 
+|[turnGreen,turnRed]|
+Red [Initial4,turnGreen,turnRed] 
+)
+
+where
+
+process Green [turnGreen,Exitc,turnRed]  : exit :=
+turnGreen;Exitc;
+(
+	turnRed;
+		Green [turnGreen,Exitc,turnRed] 
+)
+endproc
+
+process Red [Initial4,turnGreen,turnRed]  : exit :=
+Initial4;
+(
+	turnGreen;
+		Red [Initial4,turnGreen,turnRed] 
+)
+[]
+turnRed;
+(
+	turnGreen;
+		Red [Initial4,turnGreen,turnRed] 
+)
+endproc
+
+process Initial4 [Initial4,I4toLight]  : exit :=
+I4toLight;
+(
+	Initial4;
+		Initial4 [Initial4,I4toLight] 
+)
+endproc
+
+endproc
+
+process Camera [Initial5,runAway,Picture,turnOff,I5toCamera]  : exit :=
+(
+Initial5 [Initial5,I5toCamera] 
+|[Initial5]|
+PictureC [Picture,runAway,turnOff] 
+|[Picture,turnOff]|
+IdleC [Initial5,Picture,turnOff] 
+)
+
+where
+
+process PictureC [Picture,runAway,turnOff]  : exit :=
+Picture;runAway;
+(
+	turnOff;
+		PictureC [Picture,runAway,turnOff] 
+)
+endproc
+
+process IdleC [Initial5,Picture,turnOff]  : exit :=
+Initial5;
+(
+	Picture;
+		IdleC [Initial5,Picture,turnOff] 
+)
+[]
+turnOff;
+(
+	Picture;
+		IdleC [Initial5,Picture,turnOff] 
+)
+endproc
+
+process Initial5 [Initial5,I5toCamera]  : exit :=
+I5toCamera;
+(
+	Initial5;
+		Initial5 [Initial5,I5toCamera] 
+)
+endproc
+
+endproc
+
+endspec

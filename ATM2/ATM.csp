@@ -1,0 +1,144 @@
+{-*******************************************************
+
+          this tool is  Generated via Mohammad Javani 
+      in Department of Computer & Electrical Engineering
+                 University of Kashan
+                 Kashan, Esfahan, Iran 
+
+*********************************************************-}
+
+channel start,IdletoMaintenace,MaintenacetoIdle,Init0toTestingDevices, TestingDevicestoSelfDiagnosis, SelfDiagnosistoFinal0, Init1toWaiting, keyPress
+channel  CommandtoWaiting, CommandtoFinal1: Bool
+
+ATM = 
+( Initial(True)
+[| {start} |]
+( Idle
+[| {IdletoMaintenace,MaintenacetoIdle} |]
+( Maintenace
+ ) ) )
+
+
+ Initial(CRT) = 
+if CRT==true then start -> 
+		Initial (False)
+ else SKIP
+
+
+ Idle = 
+start -> 
+(
+	IdletoMaintenace -> 
+		Idle 
+)
+ [] 
+MaintenacetoIdle -> 
+(
+	IdletoMaintenace -> 
+		Idle 
+)
+
+
+ Maintenace = ( Init0
+[| {Init0toTestingDevices} |]
+( TestingDevices
+[| {TestingDevicestoSelfDiagnosis} |]
+( SelfDiagnosis
+[| {SelfDiagnosistoFinal0} |]
+( Final0
+) ) ) )
+[| {IdletoMaintenace,MaintenacetoIdle} |]
+( Init1
+[| {Init1toWaiting} |]
+( Waiting
+[| {keyPress,CommandtoWaiting.false,CommandtoWaiting.true} |]
+( Command(true)
+[| {CommandtoFinal1.false,CommandtoFinal1.true} |]
+( Final1
+ ) ) ) )  
+
+
+ TestingDevices = 
+Init0toTestingDevices -> 
+(
+	TestingDevicestoSelfDiagnosis -> 
+		TestingDevices 
+)
+
+
+ SelfDiagnosis = 
+TestingDevicestoSelfDiagnosis -> 
+(
+	SelfDiagnosistoFinal0 -> 
+		SelfDiagnosis 
+)
+
+
+ Init0 = 
+IdletoMaintenace -> 
+(
+		Init0toTestingDevices -> 
+		Init0 
+
+)
+
+
+ Final0 = 
+SelfDiagnosistoFinal0 -> 
+(
+		MaintenacetoIdle -> 
+		Final0 
+
+)
+
+
+ Waiting = 
+Init1toWaiting -> 
+(
+	keyPress -> 
+		Waiting 
+)
+ [] 
+CommandtoWaiting ?continue  -> 
+
+(
+	keyPress -> 
+		Waiting 
+)
+
+
+ Command(continue) = 
+keyPress -> 
+(
+ if continue==true then 	CommandtoWaiting !continue  ->  Command (continue) else 
+		Command (continue)
+ [] 
+ if continue==false then 	CommandtoFinal1 !continue  ->  Command (continue) else 
+		Command (continue)
+)
+
+
+ Init1 = 
+IdletoMaintenace -> 
+(
+		Init1toWaiting -> 
+		Init1 
+
+)
+
+
+ Final1 = 
+CommandtoFinal1 ?continue  -> 
+
+(
+		MaintenacetoIdle -> 
+		Final1 
+
+)
+
+
+
+
+
+ assert ATM:[ divergence free ] 
+
